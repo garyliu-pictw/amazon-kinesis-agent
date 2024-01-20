@@ -168,6 +168,8 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
             		getAwsCredentialsProvider(), getAwsClientConfiguration());
             if (!Strings.isNullOrEmpty(firehoseEndpoint()))
                 firehoseClient.setEndpoint(firehoseEndpoint());
+            if (!Strings.isNullOrEmpty(firehoseRegion()))
+            	firehoseClient.setRegion(Region.getRegion(Regions.fromName(firehoseRegion())));
         }
         return firehoseClient;
     }

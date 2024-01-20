@@ -1,14 +1,14 @@
 /*
  * Copyright 2014-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Amazon Software License (the "License").
- * You may not use this file except in compliance with the License. 
+ * You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  *  http://aws.amazon.com/asl/
- *  
- * or in the "license" file accompanying this file. 
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *
+ * or in the "license" file accompanying this file.
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
 package com.amazon.kinesis.streaming.agent.config;
@@ -34,7 +34,7 @@ public class AgentConfiguration extends Configuration {
     static final boolean DEFAULT_LOG_EMIT_INTERNAL_METRICS = false;
     static final int DEFAULT_LOG_STATUS_REPORTING_PERIOD_SECONDS = 30;
     static final int DEFAULT_CHECKPOINT_TTL_DAYS = 7;
-    protected static final int DEFAULT_ASSUME_ROLE_DURATION_SECONDS = 
+    protected static final int DEFAULT_ASSUME_ROLE_DURATION_SECONDS =
     		(int) TimeUnit.HOURS.toSeconds(1);
 
     // NOTE: If changing the default make sure to change SHUTDOWN_TIME variable in `bin/aws-kinesis-agent` as well...
@@ -50,7 +50,7 @@ public class AgentConfiguration extends Configuration {
     public static final String ENDPOINT_KEY = "endpoint";
     public static final String REGION_KEY = "region";
 
-    public AgentConfiguration(Map<String, Object> config) {
+    public AgentConfiguration(final Map<String, Object> config) {
         super(config);
     }
 
@@ -66,7 +66,7 @@ public class AgentConfiguration extends Configuration {
         return this.readString(CONFIG_SECRET_KEY, null);
     }
 
-    public AgentConfiguration(Configuration config) {
+    public AgentConfiguration(final Configuration config) {
         this(config.getConfigMap());
     }
 
@@ -89,7 +89,7 @@ public class AgentConfiguration extends Configuration {
         return this.readBoolean("cloudwatch.emitMetrics",
                 DEFAULT_CW_EMIT_METRICS);
     }
-    
+
     public boolean cloudwatchTagInstance() {
         return this.readBoolean("cloudwatch.tagInstance",
                 DEFAULT_CW_TAG_INSTANCE);
@@ -171,11 +171,11 @@ public class AgentConfiguration extends Configuration {
         return this.readInteger("checkpointTimeToLiveDays",
                 DEFAULT_CHECKPOINT_TTL_DAYS);
     }
-    
+
     public String kinesisEndpoint() {
     	return this.readString("kinesis." + ENDPOINT_KEY, null);
     }
-    
+
     public String kinesisRegion() {
         return this.readString("kinesis." + REGION_KEY, null);
     }
@@ -183,11 +183,15 @@ public class AgentConfiguration extends Configuration {
     public String firehoseEndpoint() {
         return this.readString("firehose." + ENDPOINT_KEY, null);
     }
-    
+
+    public String firehoseRegion() {
+        return this.readString("firehose." + REGION_KEY, null);
+    }
+
     public String cloudwatchEndpoint() {
         return this.readString("cloudwatch." + ENDPOINT_KEY, null);
     }
-    
+
     public String stsEndpoint() {
     	return this.readString("sts." + ENDPOINT_KEY, null);
     }
