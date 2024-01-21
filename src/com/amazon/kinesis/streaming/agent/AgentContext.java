@@ -1,14 +1,14 @@
 /*
  * Copyright 2014-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Amazon Software License (the "License").
- * You may not use this file except in compliance with the License. 
+ * You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  *  http://aws.amazon.com/asl/
- *  
- * or in the "license" file accompanying this file. 
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *
+ * or in the "license" file accompanying this file.
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
 package com.amazon.kinesis.streaming.agent;
@@ -45,9 +45,9 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehose;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseClient;
-import com.amazonaws.services.kinesis.AmazonKinesisClient;
 import com.amazonaws.util.EC2MetadataUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -79,7 +79,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
      * @param configuration
      * @throws ConfigurationException
      */
-    public AgentContext(Configuration configuration) {
+    public AgentContext(final Configuration configuration) {
         this(configuration, new FileFlowFactory());
     }
 
@@ -88,7 +88,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
      * @param fileFlowFactory
      * @throws ConfigurationException
      */
-    public AgentContext(Configuration configuration, FileFlowFactory fileFlowFactory) {
+    public AgentContext(final Configuration configuration, final FileFlowFactory fileFlowFactory) {
         super(configuration);
         this.fileFlowFactory = fileFlowFactory;
         if (cloudwatchTagInstance()) {
@@ -96,16 +96,17 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
             if (Strings.isNullOrEmpty(instanceTag)) {
                 try {
                     instanceTag = InetAddress.getLocalHost().getHostName();
-                } catch (UnknownHostException e) {
+                } catch (final UnknownHostException e) {
                     LOGGER.error("Cannot determine host name, instance tagging in CloudWatch metrics will be skipped.");
                 }
             }
         }
         if (containsKey("flows")) {
-            for (Configuration c : readList("flows", Configuration.class)) {
-                FileFlow<?> flow = fileFlowFactory.getFileFlow(this, c);
-                if (flows.containsKey(flow.getId()))
-                    throw new ConfigurationException("Duplicate flow: " + flow.getId());
+            for (final Configuration c : readList("flows", Configuration.class)) {
+                final FileFlow<?> flow = fileFlowFactory.getFileFlow(this, c);
+                if (flows.containsKey(flow.getId())) {
+					throw new ConfigurationException("Duplicate flow: " + flow.getId());
+				}
                 flows.put(flow.getId(), flow);
             }
         }
@@ -118,10 +119,10 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
     public String version() {
         final String VERSION_INFO_FILE = "versionInfo.properties";
         try (InputStream versionInfoStream = Agent.class.getResourceAsStream(VERSION_INFO_FILE)) {
-            Properties versionInfo = new Properties();
+            final Properties versionInfo = new Properties();
             versionInfo.load(versionInfoStream);
             return versionInfo.getProperty("version");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOGGER.error("Failed to read agent version from " + VERSION_INFO_FILE, e);
             return "x.x";
         }
@@ -132,8 +133,8 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
      *         destination.
      */
     public ThreadPoolExecutor createSendingExecutor() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("sender-%d").build();
-        ThreadPoolExecutor tp = new ThreadPoolExecutor(maxSendingThreads(),
+        final ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("sender-%d").build();
+        final ThreadPoolExecutor tp = new ThreadPoolExecutor(maxSendingThreads(),
                 maxSendingThreads(), sendingThreadsKeepAliveMillis(), TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(sendingThreadsMaxQueueSize()), threadFactory,
                 new ThreadPoolExecutor.AbortPolicy());
@@ -145,7 +146,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
      * @param config
      * @return the user agent component for this build.
      */
-    public String userAgent(ClientConfiguration config) {
+    public String userAgent(final ClientConfiguration config) {
         if (containsKey("userAgentOverride")) {
             return readString("userAgentOverride");
         } else {
@@ -153,7 +154,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
             if (config != null) {
                 userAgentString += " " + config.getUserAgent();
             }
-            String customAgent = readString("userAgent", null);
+            final String customAgent = readString("userAgent", null);
             if (customAgent != null && !customAgent.trim().isEmpty()) {
                 userAgentString = customAgent.trim() + " " + userAgentString;
             }
@@ -164,24 +165,34 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
     @VisibleForTesting
     public synchronized AmazonKinesisFirehose getFirehoseClient() {
         if (firehoseClient == null) {
+//        	firehoseClient = AmazonKinesisFirehoseClientBuilder.standard()
+//					.withCredentials(getAwsCredentialsProvider())
+//					.withClientConfiguration(getAwsClientConfiguration())
+//					.withMetricsCollector(null)
+//					.setRegion(firehoseRegion())
+//					.build();
             firehoseClient = new AmazonKinesisFirehoseClient(
             		getAwsCredentialsProvider(), getAwsClientConfiguration());
-            if (!Strings.isNullOrEmpty(firehoseEndpoint()))
-                firehoseClient.setEndpoint(firehoseEndpoint());
-            if (!Strings.isNullOrEmpty(firehoseRegion()))
-            	firehoseClient.setRegion(Region.getRegion(Regions.fromName(firehoseRegion())));
+            if (!Strings.isNullOrEmpty(firehoseEndpoint())) {
+				firehoseClient.setEndpoint(firehoseEndpoint());
+			}
+            if (!Strings.isNullOrEmpty(firehoseRegion())) {
+				firehoseClient.setRegion(Region.getRegion(Regions.fromName(firehoseRegion())));
+			}
         }
         return firehoseClient;
     }
-    
+
     public synchronized AmazonKinesisClient getKinesisClient() {
         if (kinesisClient == null) {
             kinesisClient = new AmazonKinesisClient(
                     getAwsCredentialsProvider(), getAwsClientConfiguration());
-            if (!Strings.isNullOrEmpty(kinesisEndpoint()))
-            	kinesisClient.setEndpoint(kinesisEndpoint());
-            if (!Strings.isNullOrEmpty(kinesisRegion()))
-                kinesisClient.setRegion(Region.getRegion(Regions.fromName(kinesisRegion())));
+            if (!Strings.isNullOrEmpty(kinesisEndpoint())) {
+				kinesisClient.setEndpoint(kinesisEndpoint());
+			}
+            if (!Strings.isNullOrEmpty(kinesisRegion())) {
+				kinesisClient.setRegion(Region.getRegion(Regions.fromName(kinesisRegion())));
+			}
         }
         return kinesisClient;
     }
@@ -197,8 +208,9 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
         if (cloudwatchClient == null) {
             cloudwatchClient = new AmazonCloudWatchClient(
                     getAwsCredentialsProvider(), getAwsClientConfiguration());
-            if (!Strings.isNullOrEmpty(cloudwatchEndpoint()))
-                cloudwatchClient.setEndpoint(cloudwatchEndpoint());
+            if (!Strings.isNullOrEmpty(cloudwatchEndpoint())) {
+				cloudwatchClient.setEndpoint(cloudwatchEndpoint());
+			}
         }
         return cloudwatchClient;
     }
@@ -207,20 +219,20 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
     	AWSCredentialsProvider credentialsProvider = new AgentAWSCredentialsProviderChain(this);
     	final String assumeRoleARN = readString(ASSUME_ROLE_ARN, null);
     	if (!Strings.isNullOrEmpty(assumeRoleARN)) {
-    		credentialsProvider = 
-    				getSTSAssumeRoleSessionCredentialsProvider(assumeRoleARN, 
+    		credentialsProvider =
+    				getSTSAssumeRoleSessionCredentialsProvider(assumeRoleARN,
     						credentialsProvider);
     	}
     	return credentialsProvider;
     }
-    
+
     public STSAssumeRoleSessionCredentialsProvider getSTSAssumeRoleSessionCredentialsProvider(
-    		String roleARN, AWSCredentialsProvider credentialsProvider) {
+    		final String roleARN, final AWSCredentialsProvider credentialsProvider) {
     	Preconditions.checkNotNull(credentialsProvider);
     	final String stsEndpoint = stsEndpoint();
     	final String roleExternalId = readString(ASSUME_ROLE_EXTERNAL_ID, null);
-    	
-    	STSAssumeRoleSessionCredentialsProvider.Builder builder = 
+
+    	STSAssumeRoleSessionCredentialsProvider.Builder builder =
     			new STSAssumeRoleSessionCredentialsProvider.Builder(roleARN, ASSUME_ROLE_SESSION)
     					.withLongLivedCredentialsProvider(credentialsProvider)
     					.withRoleSessionDurationSeconds(DEFAULT_ASSUME_ROLE_DURATION_SECONDS);
@@ -230,12 +242,12 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
     	if (!Strings.isNullOrEmpty(stsEndpoint)) {
     		builder = builder.withServiceEndpoint(stsEndpoint);
     	}
-    	
+
     	return builder.build();
     }
 
     public ClientConfiguration getAwsClientConfiguration() {
-        ClientConfiguration config = new ClientConfiguration();
+        final ClientConfiguration config = new ClientConfiguration();
         config.setUserAgent(userAgent(config));
         config.setMaxConnections(maxConnections());
         config.setConnectionTimeout(connectionTimeoutMillis());
@@ -246,7 +258,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
         return config;
     }
 
-    public synchronized FileFlow<?> flow(String flowId) {
+    public synchronized FileFlow<?> flow(final String flowId) {
         return flows.get(flowId);
     }
 
@@ -258,7 +270,7 @@ public class AgentContext extends AgentConfiguration implements IMetricsContext 
     public IMetricsScope beginScope() {
         return getMetricsContext().beginScope();
     }
-    
+
     public String getInstanceTag() {
     	return instanceTag;
     }

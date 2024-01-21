@@ -1,14 +1,14 @@
 /*
  * Copyright 2014-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Amazon Software License (the "License").
- * You may not use this file except in compliance with the License. 
+ * You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  *  http://aws.amazon.com/asl/
- *  
- * or in the "license" file accompanying this file. 
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *
+ * or in the "license" file accompanying this file.
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
 package com.amazon.kinesis.streaming.agent.tailing;
@@ -17,13 +17,13 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import lombok.Getter;
-import lombok.ToString;
-
 import com.amazon.kinesis.streaming.agent.AgentContext;
 import com.amazon.kinesis.streaming.agent.config.Configuration;
 import com.amazon.kinesis.streaming.agent.tailing.checkpoints.FileCheckpointStore;
 import com.google.common.collect.Range;
+
+import lombok.Getter;
+import lombok.ToString;
 /**
  * An implementation of a {@link FileFlow} where the destination is a firehose.
  */
@@ -44,12 +44,12 @@ public class FirehoseFileFlow extends FileFlow<FirehoseRecord> {
     @Getter protected final String id;
     @Getter protected final String destination;
 
-    public FirehoseFileFlow(AgentContext context, Configuration config) {
+    public FirehoseFileFlow(final AgentContext context, final Configuration config) {
         super(context, config);
         destination = readString(FirehoseConstants.DESTINATION_KEY);
         id = "fh:" + destination + ":" + sourceFile.toString();
 
-        int recordSizeHint = readInteger(AGGREGATED_RECORD_SIZE_BYTES_KEY, FirehoseConstants.DEFAULT_AGGREGATED_RECORD_SIZE_BYTES);
+        final int recordSizeHint = readInteger(AGGREGATED_RECORD_SIZE_BYTES_KEY, FirehoseConstants.DEFAULT_AGGREGATED_RECORD_SIZE_BYTES);
         Configuration.validateRange(recordSizeHint, VALID_AGGREGATED_RECORD_SIZE_BYTES_RANGE, AGGREGATED_RECORD_SIZE_BYTES_KEY);
         if (recordSizeHint > 0 && recordSplitter instanceof SingleLineSplitter) {
             recordSplitter = new AggregationSplitter(recordSizeHint);
@@ -73,10 +73,10 @@ public class FirehoseFileFlow extends FileFlow<FirehoseRecord> {
 
     @Override
     protected FileTailer<FirehoseRecord> createNewTailer(
-            FileCheckpointStore checkpoints,
-            ExecutorService sendingExecutor) throws IOException {
-        SourceFileTracker fileTracker = buildSourceFileTracker();
-        AsyncPublisherService<FirehoseRecord> publisher = getPublisher(checkpoints, sendingExecutor);
+            final FileCheckpointStore checkpoints,
+            final ExecutorService sendingExecutor) throws IOException {
+        final SourceFileTracker fileTracker = buildSourceFileTracker();
+        final AsyncPublisherService<FirehoseRecord> publisher = getPublisher(checkpoints, sendingExecutor);
         return new FileTailer<FirehoseRecord>(
                 agentContext, this, fileTracker,
                 publisher, buildParser(), checkpoints);
@@ -89,8 +89,8 @@ public class FirehoseFileFlow extends FileFlow<FirehoseRecord> {
 
     @Override
     protected AsyncPublisherService<FirehoseRecord> getPublisher(
-            FileCheckpointStore checkpoints,
-            ExecutorService sendingExecutor) {
+            final FileCheckpointStore checkpoints,
+            final ExecutorService sendingExecutor) {
         return new AsyncPublisherService<>(agentContext, this, checkpoints,
                         buildSender(), sendingExecutor);
     }
@@ -159,7 +159,7 @@ public class FirehoseFileFlow extends FileFlow<FirehoseRecord> {
     protected long getDefaultMaxBufferAgeMillis() {
         return FirehoseConstants.DEFAULT_MAX_BUFFER_AGE_MILLIS;
     }
-    
+
 	@Override
 	public long getDefaultRetryInitialBackoffMillis() {
 		return FirehoseConstants.DEFAULT_RETRY_INITIAL_BACKOFF_MILLIS;

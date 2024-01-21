@@ -1,0 +1,169 @@
+﻿Diagnose log at 2024-01-21T01:41:44Z
+
+AppPath: /usr/local/bin/git-credential-manager
+InstallDir: /usr/local/share/gcm-core/
+Version: 2.0.886+ea93cb5158
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: macOS
+OSVersion: 11.7.10
+Reading environment variables... OK
+ Variables:
+__CFBundleIdentifier=com.apple.Terminal
+SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.cPwA3nj6fq/Listeners
+OPENAI_API_KEY=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
+SHLVL=1
+PATH=/Library/Developer/CommandLineTools/usr/libexec/git-core:/Users/desp/.jbang/bin:/usr/local/opt/openssl/bin/:/Users/desp/.cargo/bin:/Users/desp/Downloads/google-cloud-sdk/bin:/Users/desp/.jbang/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/share/dotnet:~/.dotnet/tools:/opt/podman/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/local/go/bin:/Users/desp/Documents/workspace_go/bin:/opt/maven/bin:/opt/logstash-5.4.1/bin:/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home/bin:/opt/apache-ant-1.10.4/bin:/Users/desp/bin:/Users/desp/.rvm/bin:/Users/gary/Library/Android/sdk/tools:/Users/gary/Library/Android/sdk/platform-tools:/Users/desp/Library/Python/3.8/bin:/usr/local/gradle/bin:/Users/desp/.dotnet/tools
+ANT_HOME=/opt/apache-ant-1.10.4
+GOROOT=/usr/local/go
+ANDROID_HOME=/Users/gary/Library/Android/sdk
+CLICOLOR=1
+OLDPWD=/Users/desp/workspace
+CPATH=/usr/local/include
+TERM=xterm-256color
+REACT_EDITOR=/usr/local/bin/code
+TERM_PROGRAM_VERSION=440
+XPC_SERVICE_NAME=0
+__CF_USER_TEXT_ENCODING=0x1F5:0x2:0x35
+USER=desp
+TERM_PROGRAM=Apple_Terminal
+LSCOLORS=ExFxBxDxCxegedabagacad
+LANG=zh_TW.UTF-8
+LIBRARY_PATH=/usr/local/lib
+PS1=\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]$ 
+GOPATH=/Users/desp/Documents/workspace_go
+JAVA_HOME=/Library/Java/JavaVirtualMachines/amazon-corretto-21.jdk/Contents/Home
+SHELL=/bin/zsh
+XPC_FLAGS=0x0
+LOGNAME=desp
+PWD=/Users/desp/workspace/amazon-kinesis-agent
+TERM_SESSION_ID=1FA0FBC7-2321-48B9-9240-0A6A0AB8105E
+PYTHONPATH=/usr/local/lib/python2.7/site-packages
+JBOSS_HOME=/opt/jboss-eap-7.3
+_=/usr/bin/git
+GIT_EXEC_PATH=/Library/Developer/CommandLineTools/usr/libexec/git-core
+BASH_SILENCE_DEPRECATION_WARNING=1
+HOME=/Users/desp
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+TMPDIR=/var/folders/ld/zr30z90j0zzgtwb2c9n40j4c0000gn/T/
+EDITOR=/usr/bin/vim
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is '/var/folders/ld/zr30z90j0zzgtwb2c9n40j4c0000gn/T/'...
+Checking basic file I/O...
+Writing to temporary file '/var/folders/ld/zr30z90j0zzgtwb2c9n40j4c0000gn/T/35c74db4b7dc9357fc740501'... OK
+Reading from temporary file '/var/folders/ld/zr30z90j0zzgtwb2c9n40j4c0000gn/T/35c74db4b7dc9357fc740501'... OK
+Deleting temporary file '/var/folders/ld/zr30z90j0zzgtwb2c9n40j4c0000gn/T/35c74db4b7dc9357fc740501'... OK
+Testing IFileSystem instance...
+UserHomePath: /Users/desp
+UserDataDirectoryPath: /Users/desp/.gcm
+GetCurrentDirectory(): /Users/desp/Documents/workspace/amazon-kinesis-agent
+
+------------
+Diagnostic: Networking
+Skipped: False
+Success: True
+Exception: None
+Log:
+Checking networking and HTTP stack...
+Creating HTTP client... OK
+IsNetworkAvailable: True
+Sending HEAD request to http://example.com... OK
+Sending HEAD request to https://example.com... OK
+Acquiring free TCP port... OK
+Testing local HTTP loopback connections...
+Creating new HTTP listener for http://localhost:49813/... OK
+Waiting for loopback connection... OK
+Writing response... OK
+Waiting for response data... OK
+Loopback connection data OK
+
+------------
+Diagnostic: Git
+Skipped: False
+Success: True
+Exception: None
+Log:
+Getting Git version... OK
+Git version is '2.32.0 (Apple Git-132)'
+Locating current repository... OK
+Git repository at '/Users/desp/Documents/workspace/amazon-kinesis-agent/.git'
+Listing all Git configuration... OK
+Git configuration:
+file:/Library/Developer/CommandLineTools/usr/share/git-core/gitconfig	credential.helper=osxkeychain
+file:/Users/desp/.gitconfig	user.name=Gary Liu
+file:/Users/desp/.gitconfig	user.email=gary_liu@pic.net.tw
+file:/Users/desp/.gitconfig	core.excludesfile=/Users/desp/.gitignore_global
+file:/Users/desp/.gitconfig	difftool.sourcetree.cmd=opendiff "$LOCAL" "$REMOTE"
+file:/Users/desp/.gitconfig	difftool.sourcetree.path=
+file:/Users/desp/.gitconfig	mergetool.sourcetree.cmd=/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh "$LOCAL" "$REMOTE" -ancestor "$BASE" -merge "$MERGED"
+file:/Users/desp/.gitconfig	mergetool.sourcetree.trustexitcode=true
+file:/Users/desp/.gitconfig	commit.template=/Users/desp/.stCommitMsg
+file:/Users/desp/.gitconfig	init.defaultbranch=master
+file:/Users/desp/.gitconfig	credential.helper=
+file:/Users/desp/.gitconfig	credential.helper=/usr/local/share/gcm-core/git-credential-manager
+file:/Users/desp/.gitconfig	credential.https://dev.azure.com.usehttppath=true
+file:/Users/desp/.gitconfig	credential.https://git-codecommit.ap-northeast-1.amazonaws.com.provider=generic
+file:.git/config	core.repositoryformatversion=0
+file:.git/config	core.filemode=true
+file:.git/config	core.bare=false
+file:.git/config	core.logallrefupdates=true
+file:.git/config	core.ignorecase=true
+file:.git/config	core.precomposeunicode=true
+file:.git/config	remote.origin.url=https://github.com/garyliu-pictw/amazon-kinesis-agent.git
+file:.git/config	remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+file:.git/config	branch.master.remote=origin
+file:.git/config	branch.master.merge=refs/heads/master
+file:.git/config	branch.bugfix-194.remote=origin
+file:.git/config	branch.bugfix-194.merge=refs/heads/bugfix-194
+file:.git/config	credential.helper=manager --bar=baz
+
+
+------------
+Diagnostic: Credential storage
+Skipped: False
+Success: True
+Exception: None
+Log:
+ICredentialStore instance is of type: CredentialStore
+Writing test credential... OK
+Reading test credential... OK
+Deleting test credential... OK
+
+------------
+Diagnostic: Microsoft authentication (AAD/MSA)
+Skipped: False
+Success: True
+Exception: None
+Log:
+Broker not supported.
+Flow type is: Auto
+Gathering MSAL token cache data... OK
+CacheDirectory: /Users/desp/.local/.IdentityService
+CacheFileName: msal.cache
+CacheFilePath: /Users/desp/.local/.IdentityService/msal.cache
+MacKeyChainAccountName: MSALCache
+MacKeyChainServiceName: Microsoft.Developer.IdentityService
+Creating cache helper... OK
+Verifying MSAL token cache persistence... OK
+
+------------
+Diagnostic: GitHub API
+Skipped: False
+Success: True
+Exception: None
+Log:
+Using 'https://github.com/' as API target.
+Querying '/meta' endpoint... OK
+

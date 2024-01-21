@@ -1,14 +1,14 @@
 /*
  * Copyright 2014-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * 
+ *
  * Licensed under the Amazon Software License (the "License").
- * You may not use this file except in compliance with the License. 
+ * You may not use this file except in compliance with the License.
  * A copy of the License is located at
- * 
+ *
  *  http://aws.amazon.com/asl/
- *  
- * or in the "license" file accompanying this file. 
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *
+ * or in the "license" file accompanying this file.
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
@@ -52,22 +52,22 @@ import com.google.common.util.concurrent.MoreExecutors;
 public class Agent extends AbstractIdleService implements IHeartbeatProvider {
     private static volatile boolean dontShutdownOnExit = false;
 
-    public static void main(String[] args) throws Exception {
-        AgentOptions opts = AgentOptions.parse(args);
-        String configFile = opts.getConfigFile();
+    public static void main(final String[] args) throws Exception {
+        final AgentOptions opts = AgentOptions.parse(args);
+        final String configFile = opts.getConfigFile();
         AgentConfiguration config = tryReadConfigurationFile(Paths.get(opts.getConfigFile()));
         final Logger logger = LoggerFactory.getLogger(Agent.class);
 
         // Install an unhandled exception hook
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
-            public void uncaughtException(Thread t, Throwable e) {
+            public void uncaughtException(final Thread t, final Throwable e) {
                 if (e instanceof VirtualMachineError || e instanceof LinkageError) {
                     // This prevents the JVM from hanging in case of an OOME and if we have a LinkageError
                     // we can't trust the JVM state.
                     dontShutdownOnExit = true;
                 }
-                String msg = "FATAL: Thread " + t.getName() + " threw an unrecoverable error. Aborting application";
+                final String msg = "FATAL: Thread " + t.getName() + " threw an unrecoverable error. Aborting application";
                 try {
                     try {   // We don't know if logging is still working
                         logger.error(msg, e);
@@ -89,7 +89,7 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
             // Read the config directory
             config = readConfigurationDirectory(config);
             // Initialize and start the agent
-            AgentContext agentContext = new AgentContext(config);
+            final AgentContext agentContext = new AgentContext(config);
             if (agentContext.flows().isEmpty()) {
                 throw new ConfigurationException("There are no flows configured in configuration file.");
             }
@@ -109,7 +109,7 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
             agent.startAsync();
             agent.awaitRunning();
             agent.awaitTerminated();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Unhandled error.", e);
             System.err.println("Unhandled error.");
             e.printStackTrace();
@@ -117,49 +117,52 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
         }
     }
 
-    private static AgentConfiguration readConfigurationFile(Path configFile) throws ConfigurationException {
+    private static AgentConfiguration readConfigurationFile(final Path configFile) throws ConfigurationException {
         try {
             return new AgentConfiguration(Configuration.get(configFile));
-        } catch (ConfigurationException ce) {
+        } catch (final ConfigurationException ce) {
             throw ce;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new ConfigurationException("Failed when reading configuration file: " + configFile, e);
         }
     }
 
-    private static AgentConfiguration tryReadConfigurationFile(Path configFile) {
+    private static AgentConfiguration tryReadConfigurationFile(final Path configFile) {
         try {
             return readConfigurationFile(configFile);
-        } catch (ConfigurationException ce) {
+        } catch (final ConfigurationException ce) {
             return null;
         }
     }
-    
-    private static AgentConfiguration readConfigurationDirectory(AgentConfiguration agentConfiguration) {
+
+    private static AgentConfiguration readConfigurationDirectory(final AgentConfiguration agentConfiguration) {
         final String DEFAULT_CONFIG_DIRECTORY = "/etc/aws-kinesis/agent.d/";
         final Logger logger = LoggerFactory.getLogger(Agent.class);
 
-        File configDir = new File(DEFAULT_CONFIG_DIRECTORY);
+        final File configDir = new File(DEFAULT_CONFIG_DIRECTORY);
 
-        if (!configDir.exists() || !configDir.isDirectory()) return agentConfiguration;
+        if (!configDir.exists() || !configDir.isDirectory()) {
+			return agentConfiguration;
+		}
 
         // Add flows from the main configuration
-        List<Configuration> flows = new LinkedList();
+        final List<Configuration> flows = new LinkedList();
         flows.addAll((List<Configuration>) agentConfiguration.getConfigMap().get("flows"));
 
         // Read all configuration files
-        File[] configFiles = configDir.listFiles();
+        final File[] configFiles = configDir.listFiles();
 
         Configuration config = null;
 
-        for (File file : configFiles) {
+        for (final File file : configFiles) {
             if (file.isFile()) {
                 try {
                     logger.info("Reading flow configuration from file: " + file.getName());
                     config = Configuration.get(new FileInputStream(file));
-                    if ((config != null) && config.containsKey("flows"))
-                        flows.addAll((List<Configuration>) config.getConfigMap().get("flows"));
-                } catch (Exception ex) {
+                    if ((config != null) && config.containsKey("flows")) {
+						flows.addAll((List<Configuration>) config.getConfigMap().get("flows"));
+					}
+                } catch (final Exception ex) {
                     logger.warn("Error reading configuration file, ignoring - " + file.getName());
                 }
             }
@@ -168,10 +171,10 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
         logger.info("Found " + flows.size() + " configured flow(s)");
 
         // Append flows
-        HashMap<String, Object> newConfig = new HashMap<String,Object>(agentConfiguration.getConfigMap());
+        final HashMap<String, Object> newConfig = new HashMap<String,Object>(agentConfiguration.getConfigMap());
         newConfig.put("flows", flows);
         return new AgentConfiguration(newConfig);
-    } 
+    }
 
     private final AgentContext agentContext;
     private final HeartbeatService heartbeat;
@@ -183,14 +186,14 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
     private String name;
     private AbstractScheduledService metricsEmitter;
 
-    public Agent(AgentContext agentContext) {
+    public Agent(final AgentContext agentContext) {
         this.logger = LoggerFactory.getLogger(Agent.class);
         this.agentContext = agentContext;
         this.sendingExecutor = getSendingExecutor(agentContext);
         this.checkpoints = new SQLiteFileCheckpointStore(agentContext);
         this.heartbeat = new HeartbeatService(this.agentContext, 1, TimeUnit.SECONDS) {
             @Override
-            protected Object heartbeat(AgentContext agent) {
+            protected Object heartbeat(final AgentContext agent) {
                 return Agent.this.heartbeat(agent);
             }
 
@@ -232,34 +235,34 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
         return name;
     }
 
-    private ThreadPoolExecutor getSendingExecutor(AgentContext agentContext) {
+    private ThreadPoolExecutor getSendingExecutor(final AgentContext agentContext) {
         // NOTE: This log line is parsed by scripts in support/benchmarking.
         //       If it's modified the scripts need to be modified as well.
         logger.info("{}: Agent will use up to {} threads for sending data.", serviceName(),
                 agentContext.maxSendingThreads());
-        ThreadPoolExecutor tp = agentContext.createSendingExecutor();
+        final ThreadPoolExecutor tp = agentContext.createSendingExecutor();
         return tp;
     }
 
     @Override
     public void startUp() {
         logger.info("{}: Starting up...", serviceName());
-        Stopwatch startupTimer = Stopwatch.createStarted();
+        final Stopwatch startupTimer = Stopwatch.createStarted();
         try {
             uptime.start();
             heartbeat.startAsync();
             synchronized (lock) {
                 // TODO: Use Guava's ServiceManager
                 // Start tailers
-                for (FileFlow<?> flow : agentContext.flows()) {
+                for (final FileFlow<?> flow : agentContext.flows()) {
                     logger.info("{}: Starting tailer for file {}", serviceName(), flow.getId());
-                    FileTailer<?> tailer = flow.createTailer(checkpoints, sendingExecutor);
+                    final FileTailer<?> tailer = flow.createTailer(checkpoints, sendingExecutor);
                     tailer.startAsync();
                     tailer.awaitRunning();
                 }
             }
             metricsEmitter.startAsync();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("Unhandled exception during startup.", e);
             System.err.println("Unhandled exception during startup.");
             e.printStackTrace();
@@ -271,21 +274,21 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
     @Override
     protected void shutDown() throws Exception {
         logger.info("{}: Shutting down...", serviceName());
-        Stopwatch shutdownTimer = Stopwatch.createStarted();
+        final Stopwatch shutdownTimer = Stopwatch.createStarted();
         try {
             synchronized (lock) {
                 // Stopping all tailers
-                for (FileFlow<?> flow : agentContext.flows()) {
+                for (final FileFlow<?> flow : agentContext.flows()) {
                     flow.getTailer().stopAsync();
                 }
                 metricsEmitter.stopAsync();
                 heartbeat.stopAsync();
                 sendingExecutor.shutdown(); // no more tasks are accepted, but current tasks will try to finish
                 // Waiting for them to finish up... this should take less than agentContext.shutdownTimeMillis() (see AsyncPublisher.getShutdownTimeMillis())
-                for (FileFlow<?> flow : agentContext.flows()) {
+                for (final FileFlow<?> flow : agentContext.flows()) {
                     try {
                         flow.getTailer().awaitTerminated();
-                    } catch (RuntimeException e) {
+                    } catch (final RuntimeException e) {
                         logger.warn("{}: Error while waiting for tailer {} to stop during shutdown.",
                                 serviceName(), flow.getTailer(), e);
                     }
@@ -293,10 +296,10 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
             }
             // Shutdown executor
             try {
-                List<Runnable> tasks = sendingExecutor.shutdownNow();
+                final List<Runnable> tasks = sendingExecutor.shutdownNow();
                 logger.debug("{}: There were {} tasks that were not started due to shutdown.",
                         serviceName(), tasks.size());
-                long remaining = agentContext.shutdownTimeoutMillis() - shutdownTimer.elapsed(TimeUnit.MILLISECONDS);
+                final long remaining = agentContext.shutdownTimeoutMillis() - shutdownTimer.elapsed(TimeUnit.MILLISECONDS);
                 if (remaining > 0) {
                     logger.debug("{}: Waiting up to {} ms for any executing tasks to finish.",
                             serviceName(), remaining);
@@ -305,24 +308,24 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
                             logger.info("{}: Not all executing send tasks finished cleanly by shutdown.",
                                     serviceName());
                         }
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
                         logger.debug("{}: Interrupted while waiting for executor to shutdown.", serviceName());
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("{}: Error while waiting for executor service to stop during shutdown.",
                         serviceName(), e);
             }
             // Shutdown heartbeats
             try {
                 heartbeat.awaitTerminated();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.warn("{}: Error while waiting for heartbeat service to stop during shutdown.",
                         serviceName(), e);
             }
-        } catch (Exception e) {
-            String msg = String.format("%s: Unhandled exception during shutdown.", serviceName());
+        } catch (final Exception e) {
+            final String msg = String.format("%s: Unhandled exception during shutdown.", serviceName());
             try {   // We don't know if logging is still working
                 logger.error(msg, e);
             } finally {
@@ -334,12 +337,12 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
             // Cleanly close the checkpoint store
             checkpoints.close();
             // Print final message
-            String msg = String.format("%s: Shut down completed in %d ms. Uptime: %d ms",
+            final String msg = String.format("%s: Shut down completed in %d ms. Uptime: %d ms",
                     serviceName(), shutdownTimer.elapsed(TimeUnit.MILLISECONDS),
                     uptime.elapsed(TimeUnit.MILLISECONDS));
             try {   // We don't know if logging is still working
                 logger.info(msg);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println(msg);
                 e.printStackTrace();
             }
@@ -348,13 +351,13 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
 
     private void emitStatus() {
         try {
-            Map<String, Map<String, Object>> metrics = getMetrics();
+            final Map<String, Map<String, Object>> metrics = getMetrics();
             if (agentContext.logEmitInternalMetrics()) {
                 if (metrics != null && !metrics.isEmpty()) {
                     try {
-                        ObjectMapper mapper = new ObjectMapper();
+                        final ObjectMapper mapper = new ObjectMapper();
                         logger.info("{}: Status: {}", serviceName(), mapper.writeValueAsString(metrics));
-                    } catch (JsonProcessingException e) {
+                    } catch (final JsonProcessingException e) {
                         logger.error("{}: Failed when emitting status metrics.", serviceName(), e);
                     }
                 }
@@ -369,8 +372,8 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
                     uptime.elapsed(TimeUnit.MILLISECONDS));
 
             // Log a message if we're far behind in tailing the input
-            long bytesBehind = (long) metrics.get("Agent").get("TotalBytesBehind");
-            int filesBehind = (int) metrics.get("Agent").get("TotalFilesBehind");
+            final long bytesBehind = (long) metrics.get("Agent").get("TotalBytesBehind");
+            final int filesBehind = (int) metrics.get("Agent").get("TotalFilesBehind");
             // NOTE: This log line is parsed by scripts in support/benchmarking.
             //       If it's modified the scripts need to be modified as well.
             String msg = String.format("%s: Tailing is %02f MB (%d bytes) behind.", serviceName(),
@@ -385,15 +388,15 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
             } else if (bytesBehind > 0) {
                 logger.debug(msg);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             logger.error("{}: Failed while emitting agent status.", serviceName(), e);
         }
     }
 
     public Map<String, Map<String, Object>> getMetrics() {
-        Map<String, Map<String, Object>> metrics = new HashMap<>();
+        final Map<String, Map<String, Object>> metrics = new HashMap<>();
         synchronized (lock) {
-            for (FileFlow<?> flow : agentContext.flows()) {
+            for (final FileFlow<?> flow : agentContext.flows()) {
                 metrics.put(flow.getTailer().getId(), flow.getTailer().getMetrics());
             }
         }
@@ -401,15 +404,15 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
         return metrics;
     }
 
-    private Map<String, Object> globalMetrics(Map<String, Map<String, Object>> metrics) {
-        Map<String, Object> globalMetrics = new HashMap<>();
+    private Map<String, Object> globalMetrics(final Map<String, Map<String, Object>> metrics) {
+        final Map<String, Object> globalMetrics = new HashMap<>();
         long bytesBehind = 0;
         int filesBehind = 0;
         long bytesConsumed = 0;
         long recordsParsed = 0;
         long recordsSent = 0;
-        AtomicLong zero = new AtomicLong(0);
-        for (Map.Entry<String, Map<String, Object>> tailerMetrics : metrics.entrySet()) {
+        final AtomicLong zero = new AtomicLong(0);
+        for (final Map.Entry<String, Map<String, Object>> tailerMetrics : metrics.entrySet()) {
             bytesBehind += Metrics.getMetric(tailerMetrics.getValue(), Metrics.FILE_TAILER_BYTES_BEHIND_METRIC, 0L);
             filesBehind += Metrics.getMetric(tailerMetrics.getValue(), Metrics.FILE_TAILER_FILES_BEHIND_METRIC, 0);
             bytesConsumed += Metrics.getMetric(tailerMetrics.getValue(), Metrics.PARSER_TOTAL_BYTES_CONSUMED_METRIC, zero).get();
@@ -441,9 +444,9 @@ public class Agent extends AbstractIdleService implements IHeartbeatProvider {
     }
 
     @Override
-    public Object heartbeat(AgentContext agent) {
+    public Object heartbeat(final AgentContext agent) {
         synchronized (lock) {
-            for (FileFlow<?> flow : agentContext.flows()) {
+            for (final FileFlow<?> flow : agentContext.flows()) {
                 flow.getTailer().heartbeat(agent);
             }
             return null;

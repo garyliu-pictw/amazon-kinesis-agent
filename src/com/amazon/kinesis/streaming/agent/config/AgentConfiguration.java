@@ -192,7 +192,12 @@ public class AgentConfiguration extends Configuration {
         return this.readString("cloudwatch." + ENDPOINT_KEY, null);
     }
 
+    public String cloudwatchRegion() {
+        return this.readString("cloudwatch." + REGION_KEY, null);
+    }
+
     public String stsEndpoint() {
     	return this.readString("sts." + ENDPOINT_KEY, null);
     }
+
 }
